@@ -10,8 +10,10 @@ from .railway import scrape_railway
 from .defence import scrape_defence
 from .police import scrape_police
 from .all_india import scrape_all_india
+from .freejobalert import scrape_all_freejobalert
 
 SCRAPER_REGISTRY = {
+    "freejobalert": scrape_all_freejobalert,
     "ssc": scrape_ssc,
     "upsc": scrape_upsc,
     "railway": scrape_railway,
@@ -33,6 +35,7 @@ def run_department_scraper(dept_name):
 def run_all_scrapers():
     print("====================================================================")
     print("🚀 JOBVANI MASTER SCRAPER: Running all India Government Sectors...")
+    print("   [Primary] FreeJobAlert Aggregator (Filtered 100% Official Links & PDFs)")
     print("   [1] SSC (CGL, CHSL, MTS, GD, CPO)")
     print("   [2] UPSC (Civil Services, NDA, CDS)")
     print("   [3] Railways (RRB NTPC, ALP, Group D, RPF)")
@@ -48,6 +51,7 @@ def run_all_scrapers():
     total_keys = 0
 
     functions = [
+        scrape_all_freejobalert,
         scrape_ssc,
         scrape_upsc,
         scrape_railway,

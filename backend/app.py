@@ -36,7 +36,7 @@ import asyncio
 async def auto_scraper_loop():
     while True:
         try:
-            await asyncio.sleep(4 * 3600) # Every 4 hours
+            await asyncio.sleep(15 * 60) # Automatically syncs every 15 minutes
             from scrapers.runner import run_all_scrapers
             run_all_scrapers()
         except Exception as e:
@@ -238,8 +238,30 @@ def subscribe_newsletter(data: models.SubscriberCreate):
     return {"status": "success" if success else "already_subscribed"}
 
 # -------------------------------------------------------------
-# AUTO-PILOT SCRAPER TRIGGER
+# AUTO-PILOT SCRAPER TRIGGER & PDF PROXY
 # -------------------------------------------------------------
+@app.get("/api/pdf-stream")
+async def stream_pdf(url: str = Query(...)):
+    """Streams official PDF notices in-browser so user stays on JobVani."""
+    if not url or not url.startswith("http"):
+        raise HTTPException(status_code=400, detail="Invalid PDF URL")
+    try:
+        import httpx
+        async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
+            r = await client.get(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
+            if r.status_code != 200:
+                raise HTTPException(status_code=404, detail="Could not retrieve PDF file")
+            return Response(
+                content=r.content,
+                media_type="application/pdf",
+                headers={
+                    "Content-Disposition": 'inline; filename="official_notice.pdf"',
+                    "Cache-Control": "public, max-age=86400"
+                }
+            )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"PDF streaming error: {str(e)}")
+
 @app.post("/api/scraper/run")
 def trigger_scraper(department: str = Query(None)):
     if department:

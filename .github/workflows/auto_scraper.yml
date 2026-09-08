@@ -2,8 +2,8 @@ name: JobVani Auto-Pilot Scraper Sync
 
 on:
   schedule:
-    # Runs every 4 hours automatically (UTC)
-    - cron: '0 */4 * * *'
+    # Runs every 5 minutes automatically (UTC)
+    - cron: '*/5 * * * *'
   workflow_dispatch: # Allows manual 1-click trigger from GitHub Actions tab
   push:
     branches: [ main, master ]

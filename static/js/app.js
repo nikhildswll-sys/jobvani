@@ -32,6 +32,55 @@ const JobVaniApp = {
     return '/static/images/logo_state.svg';
   },
 
+  // Dynamic Sector Badge Generator (Gradients + Icons + Initial Monograms)
+  getOrgBadge(org = '', category = '') {
+    const text = (org + ' ' + category).toLowerCase();
+
+    if (text.includes('ssc') || text.includes('staff selection')) {
+      return { bg: 'linear-gradient(135deg, #1e3a8a, #3b82f6)', color: '#ffffff', icon: '<i class="fa-solid fa-landmark"></i>' };
+    }
+    if (text.includes('upsc') || text.includes('union public') || text.includes('ias') || text.includes('ips')) {
+      return { bg: 'linear-gradient(135deg, #831843, #be185d)', color: '#ffffff', icon: '<i class="fa-solid fa-scale-balanced"></i>' };
+    }
+    if (text.includes('railway') || text.includes('rrb') || text.includes('rrc') || text.includes('irctc')) {
+      return { bg: 'linear-gradient(135deg, #b91c1c, #ea580c)', color: '#ffffff', icon: '<i class="fa-solid fa-train"></i>' };
+    }
+    if (text.includes('bank') || text.includes('ibps') || text.includes('sbi') || text.includes('rbi') || text.includes('bob') || text.includes('pnb') || text.includes('exim')) {
+      return { bg: 'linear-gradient(135deg, #0f172a, #1e40af)', color: '#fbbf24', icon: '<i class="fa-solid fa-building-columns"></i>' };
+    }
+    if (text.includes('army') || text.includes('navy') || text.includes('air force') || text.includes('defence') || text.includes('nda') || text.includes('cds') || text.includes('afcat')) {
+      return { bg: 'linear-gradient(135deg, #14532d, #15803d)', color: '#ffffff', icon: '<i class="fa-solid fa-shield-halved"></i>' };
+    }
+    if (text.includes('police') || text.includes('constable') || text.includes('si') || text.includes('itbp') || text.includes('crpf') || text.includes('cisf') || text.includes('bsf')) {
+      return { bg: 'linear-gradient(135deg, #1e1b4b, #4338ca)', color: '#facc15', icon: '<i class="fa-solid fa-star"></i>' };
+    }
+    if (text.includes('teaching') || text.includes('tet') || text.includes('ctet') || text.includes('kvs') || text.includes('nvs') || text.includes('d.el.ed') || text.includes('bed') || text.includes('univ')) {
+      return { bg: 'linear-gradient(135deg, #4c1d95, #7c3aed)', color: '#ffffff', icon: '<i class="fa-solid fa-graduation-cap"></i>' };
+    }
+    if (text.includes('medical') || text.includes('nurse') || text.includes('aiims') || text.includes('tmc') || text.includes('health') || text.includes('doctor')) {
+      return { bg: 'linear-gradient(135deg, #0e7490, #06b6d4)', color: '#ffffff', icon: '<i class="fa-solid fa-kit-medical"></i>' };
+    }
+    if (text.includes('oil') || text.includes('tngecl') || text.includes('mecdm') || text.includes('iocl') || text.includes('ongc') || text.includes('ntpc') || text.includes('power') || text.includes('energy')) {
+      return { bg: 'linear-gradient(135deg, #c2410c, #f59e0b)', color: '#ffffff', icon: '<i class="fa-solid fa-bolt"></i>' };
+    }
+
+    // Dynamic Monogram from Org Name (e.g. "PSSSB" -> "PS", "High Court" -> "HC")
+    const cleanOrg = org.replace(/[^a-zA-Z0-9\s]/g, '').trim();
+    const parts = cleanOrg.split(/\s+/).filter(p => p.length > 0);
+    let mono = 'GOV';
+    if (parts.length >= 2) {
+      mono = (parts[0][0] + parts[1][0]).toUpperCase();
+    } else if (parts.length === 1) {
+      mono = parts[0].slice(0, Math.min(3, parts[0].length)).toUpperCase();
+    }
+
+    return {
+      bg: 'linear-gradient(135deg, #1e293b, #334155)',
+      color: '#38bdf8',
+      icon: `<span style="font-size: 0.85rem; font-weight: 800; letter-spacing: -0.02em;">${mono}</span>`
+    };
+  },
+
   // Setup Dark / Light mode
   setupTheme() {
     const savedTheme = localStorage.getItem('jobvani_theme') || 'light';
@@ -325,73 +374,87 @@ const JobVaniApp = {
       return;
     }
 
-    // Render in Card Grid Mode
+    // Render in Modern Apple/Stripe Grade Card Grid Mode
     if (this.currentViewMode === 'grid') {
       gridEl.innerHTML = jobs.map(job => {
-        const logoUrl = this.getOrgLogo(job.organization, job.category);
-        const qualDisplay = job.qualification.length > 20 ? job.qualification.slice(0, 18) + '...' : job.qualification;
+        const badge = this.getOrgBadge(job.organization, job.category);
         const isSaved = this.savedJobIds.has(job.id);
-        const salaryText = job.salary ? job.salary.split('(')[0].trim().slice(0, 22) : 'Pay Level 4-8';
+        const salaryText = job.salary ? job.salary.split('(')[0].trim() : '7th CPC Pay Matrix';
+        const cleanQual = job.qualification || 'Graduate / 10th / 12th';
+        const isUrgent = job.last_date && (job.last_date.toLowerCase().includes('today') || job.last_date.toLowerCase().includes('tomorrow') || job.last_date.toLowerCase().includes('2025'));
 
         return `
-          <article class="job-card">
+          <article class="job-card" onclick="window.location.hash = '#jobs/${job.slug}'">
+            <!-- Header: Dynamic Sector Avatar, Tags, and Save/Share Tools -->
             <div class="job-card-top">
-              <div class="job-org-left">
-                <div class="org-logo-circle">
-                  <img src="${logoUrl}" class="org-logo-img" alt="${job.organization}">
-                </div>
-                <div class="job-header-text">
-                  <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
-                    <span class="job-verified-pill">✓ Verified</span>
-                    <span style="font-size: 0.68rem; color: var(--text-muted);">${job.category}</span>
-                  </div>
-                  <h3 class="job-card-title" onclick="window.location.hash = '#jobs/${job.slug}'" title="${job.title}">${job.title}</h3>
-                  <p class="job-card-org" title="${job.organization}">${job.organization}</p>
-                </div>
+              <div class="job-org-badge" style="background: ${badge.bg}; color: ${badge.color};">
+                ${badge.icon}
               </div>
-              <div style="display: flex; align-items: center; gap: 4px;">
-                <button class="card-action-icon-btn btn-wa" onclick="JobVaniApp.shareWhatsApp('${job.title.replace(/'/g, "\\'")}', '${job.slug}')" title="Share on WhatsApp">
+              <div class="job-header-info">
+                <div class="job-pill-row">
+                  <span class="pill-govt-verified"><i class="fa-solid fa-check" style="font-size:0.6rem;"></i> Verified</span>
+                  <span class="pill-sector-tag">${job.category || 'Central Govt'}</span>
+                </div>
+                <p class="job-card-org" title="${job.organization}">${job.organization}</p>
+              </div>
+              <div class="job-card-tools" onclick="event.stopPropagation();">
+                <button class="card-tool-btn btn-wa" onclick="JobVaniApp.shareWhatsApp('${job.title.replace(/'/g, "\\'")}', '${job.slug}')" title="Share on WhatsApp">
                   <i class="fa-brands fa-whatsapp"></i>
                 </button>
-                <button class="card-quick-save-btn ${isSaved ? 'saved' : ''}" 
+                <button class="card-tool-btn ${isSaved ? 'saved' : ''}" 
                         onclick="JobVaniApp.toggleBookmarkAction(${job.id}, this)" 
-                        title="${isSaved ? 'Saved' : 'Save to bookmarks'}">
+                        title="${isSaved ? 'Saved' : 'Save Job'}">
                   <i class="${isSaved ? 'fa-solid' : 'fa-regular'} fa-bookmark"></i>
                 </button>
               </div>
             </div>
 
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
-              <div class="job-salary-pill">
-                <i class="fa-solid fa-indian-rupee-sign" style="font-size: 0.68rem;"></i>
+            <!-- Full Job Title (2-Line Responsive Clamp - No weird dots) -->
+            <h3 class="job-card-title" title="${job.title}">${job.title}</h3>
+
+            <!-- Micro Chips Bar: Vacancies, Eligibility, Location -->
+            <div class="job-chips-grid">
+              <div class="chip-item chip-vacancies">
+                <i class="fa-solid fa-users"></i>
+                <span>${job.vacancies || 'Various Posts'}</span>
+              </div>
+              <div class="chip-item chip-qual">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <span title="${job.qualification}">${cleanQual}</span>
+              </div>
+              <div class="chip-item">
+                <i class="fa-solid fa-location-dot"></i>
+                <span>${job.location || 'All India'}</span>
+              </div>
+            </div>
+
+            <!-- Salary & Deadline Row -->
+            <div class="job-meta-bar">
+              <div class="meta-salary">
+                <i class="fa-solid fa-indian-rupee-sign" style="font-size:0.7rem;"></i>
                 <span>${salaryText}</span>
               </div>
-              <span class="job-urgency-pill ${job.last_date && job.last_date.includes('Aug') ? 'urgent' : ''}">
-                <i class="fa-regular fa-clock"></i> Last Date: ${job.last_date}
-              </span>
-            </div>
-
-            <div class="job-specs-list">
-              <div class="spec-row">
-                <span class="spec-label">Vacancies:</span>
-                <span class="spec-val" style="color: var(--primary-blue); font-weight: 800;">${job.vacancies}</span>
-              </div>
-              <div class="spec-row">
-                <span class="spec-label">Qualification:</span>
-                <span class="spec-val" title="${job.qualification}">${qualDisplay}</span>
-              </div>
-              <div class="spec-row">
-                <span class="spec-label">Location:</span>
-                <span class="spec-val">${job.location || 'All India'}</span>
+              <div class="meta-deadline ${isUrgent ? 'urgent' : ''}">
+                <i class="fa-regular fa-calendar-check"></i>
+                <span>${job.last_date ? job.last_date : 'Check Notice'}</span>
               </div>
             </div>
 
-            <div class="job-card-actions">
-              <button class="btn-view-details" onclick="window.location.hash = '#jobs/${job.slug}'">View Details</button>
-              <a href="${job.official_apply_url || job.official_website_url}" target="_blank" class="btn-apply-now" onclick="JobVaniAPI.trackApplyClick('${job.slug}')">
+            <!-- Card Actions Footer (Details + Apply + 1-Tap PDF) -->
+            <div class="job-card-actions" onclick="event.stopPropagation();">
+              <button class="btn-card-secondary" onclick="window.location.hash = '#jobs/${job.slug}'">
+                <span>View Details</span>
+                <i class="fa-solid fa-arrow-right" style="font-size:0.7rem;"></i>
+              </button>
+              <a href="${job.official_apply_url || job.official_website_url}" target="_blank" class="btn-card-apply" onclick="JobVaniAPI.trackApplyClick('${job.slug}')">
                 <span>Apply</span>
-                <i class="fa-solid fa-arrow-right" style="font-size: 0.72rem; margin-left: 4px;"></i>
+                <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.7rem;"></i>
               </a>
+              ${job.official_notification_url ? `
+              <a href="${job.official_notification_url}" target="_blank" class="btn-card-pdf" title="Download Official Notification PDF">
+                <i class="fa-regular fa-file-pdf"></i>
+              </a>
+              ` : ''}
             </div>
           </article>
         `;
@@ -558,7 +621,7 @@ const JobVaniApp = {
                   <span class="kpi-title-text">Pay Scale / Salary</span>
                   <div class="kpi-icon-pill kpi-green"><i class="fa-solid fa-indian-rupee-sign"></i></div>
                 </div>
-                <span class="kpi-main-val" style="color: #059669; font-size: 1.08rem;">${job.salary ? job.salary.split('(')[0].trim().slice(0, 18) : 'Level 4 to 8'}</span>
+                <span class="kpi-main-val" style="color: #059669;">${job.salary ? job.salary.split('(')[0].trim() : '7th CPC Pay Matrix'}</span>
                 <span class="kpi-sub-text">7th Central Pay Commission</span>
               </div>
 
@@ -567,7 +630,7 @@ const JobVaniApp = {
                   <span class="kpi-title-text">Qualification</span>
                   <div class="kpi-icon-pill kpi-purple"><i class="fa-solid fa-graduation-cap"></i></div>
                 </div>
-                <span class="kpi-main-val" style="color: #9333ea; font-size: 1.1rem;">${job.qualification.length > 18 ? job.qualification.slice(0, 16) + '..' : job.qualification}</span>
+                <span class="kpi-main-val" style="color: #7c3aed;">${job.qualification || 'Graduate / 10th / 12th'}</span>
                 <span class="kpi-sub-text">Recognized University/Board</span>
               </div>
             </div>
@@ -1074,27 +1137,57 @@ const JobVaniApp = {
           <h1 class="section-main-heading"><span class="heading-blue-dot"></span> Latest Admit Cards (Hall Tickets)</h1>
         </div>
         <div class="jobs-four-col-grid">
-          ${items.map(item => `
-            <div class="job-card">
-              <div class="job-card-top">
-                <div class="org-logo-circle">
-                  <img src="${this.getOrgLogo(item.organization, item.category)}" class="org-logo-img" alt="${item.organization}">
+          ${items.map(item => {
+            const badge = this.getOrgBadge(item.organization, item.category);
+            return `
+              <div class="job-card">
+                <div class="job-card-top">
+                  <div class="job-org-badge" style="background: ${badge.bg}; color: ${badge.color};">
+                    ${badge.icon}
+                  </div>
+                  <div class="job-header-info">
+                    <div class="job-pill-row">
+                      <span class="pill-govt-verified"><i class="fa-solid fa-check" style="font-size:0.6rem;"></i> Verified</span>
+                      <span class="pill-sector-tag">${item.category || 'Admit Card'}</span>
+                    </div>
+                    <p class="job-card-org" title="${item.organization}">${item.organization}</p>
+                  </div>
                 </div>
-                <div class="job-header-text">
-                  <h3 class="job-card-title">${item.exam_name}</h3>
-                  <p class="job-card-org">${item.organization}</p>
+
+                <h3 class="job-card-title" title="${item.exam_name}">${item.exam_name}</h3>
+
+                <div class="job-chips-grid">
+                  <div class="chip-item">
+                    <i class="fa-regular fa-calendar-check"></i>
+                    <span>Release: ${item.release_date}</span>
+                  </div>
+                  <div class="chip-item chip-vacancies">
+                    <i class="fa-regular fa-clock"></i>
+                    <span>Exam: ${item.exam_date}</span>
+                  </div>
+                </div>
+
+                <div class="job-meta-bar">
+                  <div class="meta-salary" style="color: #059669;">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>${item.status || 'Available Now'}</span>
+                  </div>
+                </div>
+
+                <div class="job-card-actions">
+                  <a href="${item.download_url}" target="_blank" class="btn-card-apply" style="flex:1;">
+                    <i class="fa-solid fa-download" style="font-size:0.75rem;"></i>
+                    <span>Download Hall Ticket</span>
+                  </a>
+                  ${item.official_website_url ? `
+                  <a href="${item.official_website_url}" target="_blank" class="btn-card-secondary" title="Official Website">
+                    <i class="fa-solid fa-globe"></i>
+                  </a>
+                  ` : ''}
                 </div>
               </div>
-              <div class="job-specs-list">
-                <div class="spec-row"><span class="spec-label">Release Date:</span><span class="spec-val">${item.release_date}</span></div>
-                <div class="spec-row"><span class="spec-label">Exam Date:</span><span class="spec-val">${item.exam_date}</span></div>
-                <div class="spec-row"><span class="spec-label">Status:</span><span class="spec-val" style="color: #16a34a;">${item.status}</span></div>
-              </div>
-              <div class="job-card-actions">
-                <a href="${item.download_url}" target="_blank" class="btn-apply-now" style="width: 100%; text-align: center;">Download Admit Card</a>
-              </div>
-            </div>
-          `).join('')}
+            `;
+          }).join('')}
         </div>
       </div>
     `;
@@ -1110,29 +1203,60 @@ const JobVaniApp = {
     view.innerHTML = `
       <div class="container">
         <div class="section-title-row" style="margin-bottom: 30px;">
-          <h1 class="section-main-heading"><span class="heading-blue-dot"></span> Declared Examination Results</h1>
+          <h1 class="section-main-heading"><span class="heading-blue-dot"></span> Declared Examination Results & Merit Lists</h1>
         </div>
         <div class="jobs-four-col-grid">
-          ${items.map(item => `
-            <div class="job-card">
-              <div class="job-card-top">
-                <div class="org-logo-circle">
-                  <img src="${this.getOrgLogo(item.organization, item.exam_stage)}" class="org-logo-img" alt="${item.organization}">
+          ${items.map(item => {
+            const badge = this.getOrgBadge(item.organization, item.exam_stage);
+            return `
+              <div class="job-card">
+                <div class="job-card-top">
+                  <div class="job-org-badge" style="background: ${badge.bg}; color: ${badge.color};">
+                    ${badge.icon}
+                  </div>
+                  <div class="job-header-info">
+                    <div class="job-pill-row">
+                      <span class="pill-govt-verified"><i class="fa-solid fa-check" style="font-size:0.6rem;"></i> Verified Result</span>
+                      <span class="pill-sector-tag">${item.exam_stage || 'Final'}</span>
+                    </div>
+                    <p class="job-card-org" title="${item.organization}">${item.organization}</p>
+                  </div>
                 </div>
-                <div class="job-header-text">
-                  <h3 class="job-card-title">${item.exam_name}</h3>
-                  <p class="job-card-org">${item.organization}</p>
+
+                <h3 class="job-card-title" title="${item.exam_name}">${item.exam_name}</h3>
+
+                <div class="job-chips-grid">
+                  <div class="chip-item chip-vacancies">
+                    <i class="fa-regular fa-calendar-check"></i>
+                    <span>Declared: ${item.result_date}</span>
+                  </div>
+                  <div class="chip-item chip-qual">
+                    <i class="fa-solid fa-award"></i>
+                    <span>${item.exam_stage || 'Score Card'}</span>
+                  </div>
+                </div>
+
+                <div class="job-meta-bar">
+                  <div class="meta-salary" style="color: #059669;">
+                    <i class="fa-solid fa-square-poll-vertical"></i>
+                    <span>${item.status || 'Declared (PDF)'}</span>
+                  </div>
+                </div>
+
+                <div class="job-card-actions">
+                  <a href="${item.view_result_url}" target="_blank" class="btn-card-apply" style="flex:1;">
+                    <i class="fa-solid fa-file-arrow-down" style="font-size:0.75rem;"></i>
+                    <span>Check Result / PDF</span>
+                  </a>
+                  ${item.official_website_url ? `
+                  <a href="${item.official_website_url}" target="_blank" class="btn-card-secondary" title="Official Website">
+                    <i class="fa-solid fa-globe"></i>
+                  </a>
+                  ` : ''}
                 </div>
               </div>
-              <div class="job-specs-list">
-                <div class="spec-row"><span class="spec-label">Result Date:</span><span class="spec-val">${item.result_date}</span></div>
-                <div class="spec-row"><span class="spec-label">Stage:</span><span class="spec-val">${item.exam_stage}</span></div>
-              </div>
-              <div class="job-card-actions">
-                <a href="${item.view_result_url}" target="_blank" class="btn-apply-now" style="width: 100%; text-align: center;">Check Result (PDF)</a>
-              </div>
-            </div>
-          `).join('')}
+            `;
+          }).join('')}
         </div>
       </div>
     `;
@@ -1148,30 +1272,60 @@ const JobVaniApp = {
     view.innerHTML = `
       <div class="container">
         <div class="section-title-row" style="margin-bottom: 30px;">
-          <h1 class="section-main-heading"><span class="heading-blue-dot"></span> Official Answer Keys & Objection Windows</h1>
+          <h1 class="section-main-heading"><span class="heading-blue-dot"></span> Official Answer Keys & Objection Portals</h1>
         </div>
         <div class="jobs-four-col-grid">
-          ${items.map(item => `
-            <div class="job-card">
-              <div class="job-card-top">
-                <div class="org-logo-circle">
-                  <img src="${this.getOrgLogo(item.organization, '')}" class="org-logo-img" alt="${item.organization}">
+          ${items.map(item => {
+            const badge = this.getOrgBadge(item.organization, '');
+            return `
+              <div class="job-card">
+                <div class="job-card-top">
+                  <div class="job-org-badge" style="background: ${badge.bg}; color: ${badge.color};">
+                    ${badge.icon}
+                  </div>
+                  <div class="job-header-info">
+                    <div class="job-pill-row">
+                      <span class="pill-govt-verified"><i class="fa-solid fa-check" style="font-size:0.6rem;"></i> Official Key</span>
+                      <span class="pill-sector-tag">${item.challenge_window || 'Active'}</span>
+                    </div>
+                    <p class="job-card-org" title="${item.organization}">${item.organization}</p>
+                  </div>
                 </div>
-                <div class="job-header-text">
-                  <h3 class="job-card-title">${item.exam_name}</h3>
-                  <p class="job-card-org">${item.organization}</p>
+
+                <h3 class="job-card-title" title="${item.exam_name}">${item.exam_name}</h3>
+
+                <div class="job-chips-grid">
+                  <div class="chip-item">
+                    <i class="fa-regular fa-clock"></i>
+                    <span>Exam: ${item.exam_date}</span>
+                  </div>
+                  <div class="chip-item chip-vacancies">
+                    <i class="fa-regular fa-calendar-check"></i>
+                    <span>Released: ${item.release_date}</span>
+                  </div>
+                </div>
+
+                <div class="job-meta-bar">
+                  <div class="meta-salary" style="color: #0284c7;">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>Objection Window Active</span>
+                  </div>
+                </div>
+
+                <div class="job-card-actions">
+                  <a href="${item.download_url}" target="_blank" class="btn-card-apply" style="flex:1;">
+                    <i class="fa-solid fa-key" style="font-size:0.75rem;"></i>
+                    <span>Download Key (PDF)</span>
+                  </a>
+                  ${item.official_notice_url ? `
+                  <a href="${item.official_notice_url}" target="_blank" class="btn-card-secondary" title="Official Website">
+                    <i class="fa-solid fa-globe"></i>
+                  </a>
+                  ` : ''}
                 </div>
               </div>
-              <div class="job-specs-list">
-                <div class="spec-row"><span class="spec-label">Exam Date:</span><span class="spec-val">${item.exam_date}</span></div>
-                <div class="spec-row"><span class="spec-label">Released:</span><span class="spec-val">${item.release_date}</span></div>
-                <div class="spec-row"><span class="spec-label">Objection:</span><span class="spec-val">${item.challenge_window || 'Open'}</span></div>
-              </div>
-              <div class="job-card-actions">
-                <a href="${item.download_url}" target="_blank" class="btn-apply-now" style="width: 100%; text-align: center;">Download Key</a>
-              </div>
-            </div>
-          `).join('')}
+            `;
+          }).join('')}
         </div>
       </div>
     `;
@@ -1380,11 +1534,14 @@ const JobVaniApp = {
     }
 
     if (res && res.status === 'success') {
-      const added = (res.total_new_jobs !== undefined) ? res.total_new_jobs : (res.new_jobs_added || 0);
-      this.showToast(`✅ Ingested ${added} new government notifications!`);
+      const j = res.total_new_jobs !== undefined ? res.total_new_jobs : (res.new_jobs_added || 0);
+      const a = res.total_new_admit_cards || 0;
+      const r = res.total_new_results || 0;
+      const k = res.total_new_answer_keys || 0;
+      this.showToast(`✅ Ingestion Complete: +${j} Jobs, +${a} Admit Cards, +${r} Results, +${k} Keys!`);
       this.renderAdminDashboard();
     } else {
-      this.showToast('Notice: Scraper completed sync with official feeds.');
+      this.showToast('Notice: Scraper completed sync with official portals.');
       this.renderAdminDashboard();
     }
   },

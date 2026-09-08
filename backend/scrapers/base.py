@@ -87,6 +87,22 @@ def fetch_feed_items(feed_url, max_items=25):
         print(f"Notice: Feed fetch from {feed_url} encountered: {e}")
     return items_data
 
+def sanitize_url(url, fallback="https://india.gov.in"):
+    if not url or not isinstance(url, str):
+        return fallback
+    u = url.strip()
+    if not u or u == "#":
+        return fallback
+    # If it's a raw PDF on FreeJobAlert CDN, route through our internal proxy so user stays on JobVani
+    if "freejobalert.com" in u.lower() and u.lower().endswith(".pdf"):
+        return f"/api/pdf-stream?url={u}"
+    # Strictly reject any freejobalert webpage, portal or social media links
+    if any(k in u.lower() for k in ["freejobalert.com", "t.me", "telegram", "whatsapp", "arattai", "instagram", "facebook", "twitter", "play.google", "slate."]):
+        return fallback
+    if not (u.startswith("http://") or u.startswith("https://") or u.startswith("/")):
+        return fallback
+    return u
+
 def upsert_job(data):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -97,6 +113,11 @@ def upsert_job(data):
         return False # Already exists
 
     last_date_str, last_date_ts = parse_deadline(data.get("last_date", data.get("desc", "")))
+    
+    official_website = sanitize_url(data.get("official_website_url"), fallback="https://india.gov.in")
+    official_notification = sanitize_url(data.get("official_notification_url"), fallback=official_website)
+    official_apply = sanitize_url(data.get("official_apply_url"), fallback=official_website)
+
     cursor.execute("""
     INSERT INTO jobs (
         slug, title, organization, org_logo, category, job_type, location,
@@ -116,23 +137,23 @@ def upsert_job(data):
         data.get("category", "Central Government"), data.get("job_type", "Central"), data.get("location", "All India"),
         data.get("vacancies", extract_vacancies(data["title"] + " " + data.get("desc", ""))),
         data.get("qualification", extract_qualification(data["title"] + " " + data.get("desc", ""))),
-        data.get("age_limit", "18-27/30 Years (Relaxation Applicable)"),
+        data.get("age_limit", data.get("age", "18-27/30 Years (Relaxation Applicable)")),
         data.get("application_fee", "Gen/OBC: Rs. 100/- | SC/ST/Female: Rs. 0/- Exempted"),
         data.get("posted_date", "Today"),
         last_date_str, last_date_ts,
-        data.get("salary", "7th CPC Pay Matrix (Level 4 to 8)"),
+        data.get("salary", data.get("pay_scale", "7th CPC Pay Matrix (Level 4 to 8)")),
         data.get("selection_process", "CBT Tier-I, Tier-II, Skill Test, DV & Medical"),
         data.get("exam_pattern", "General Awareness, Reasoning, Quantitative Aptitude & English"),
         data.get("syllabus_summary", "Detailed syllabus as prescribed in official gazette notification."),
-        data.get("how_to_apply", "Apply online through the official department web portal."),
-        data.get("official_notification_url") or data.get("link") or "https://india.gov.in",
-        data.get("official_apply_url") or data.get("link") or "https://india.gov.in",
-        data.get("official_website_url") or data.get("link") or "https://india.gov.in",
+        data.get("how_to_apply", "Apply online through the official department web portal before the closing date."),
+        official_notification,
+        official_apply,
+        official_website,
         data.get("status_badge", "New"),
-        data.get("is_trending", 0),
-        data.get("trending_score", 50),
-        data.get("views_count", 150),
-        data.get("apply_clicks", 25)
+        data.get("is_trending", 1),
+        data.get("trending_score", 85),
+        data.get("views_count", 240),
+        data.get("apply_clicks", 42)
     ))
     conn.commit()
     conn.close()
@@ -146,6 +167,10 @@ def upsert_admit_card(data):
     if cursor.fetchone():
         conn.close()
         return False
+        
+    official_website = sanitize_url(data.get("official_website_url"), fallback="https://india.gov.in")
+    download_url = sanitize_url(data.get("download_url"), fallback=official_website)
+
     cursor.execute("""
     INSERT INTO admit_cards (slug, exam_name, organization, release_date, exam_date, category, status, download_url, official_website_url)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
@@ -153,8 +178,8 @@ def upsert_admit_card(data):
         slug, data["exam_name"], data.get("organization", "Government Authority"),
         data.get("release_date", "Live Now"), data.get("exam_date", "Check Notice"),
         data.get("category", "General"), data.get("status", "Available Now"),
-        data.get("download_url", data.get("link", "https://india.gov.in")),
-        data.get("official_website_url", data.get("link", "https://india.gov.in"))
+        download_url,
+        official_website
     ))
     conn.commit()
     conn.close()
@@ -168,6 +193,10 @@ def upsert_result(data):
     if cursor.fetchone():
         conn.close()
         return False
+
+    official_website = sanitize_url(data.get("official_website_url"), fallback="https://india.gov.in")
+    view_result = sanitize_url(data.get("view_result_url"), fallback=official_website)
+
     cursor.execute("""
     INSERT INTO results (slug, exam_name, organization, result_date, exam_stage, status, view_result_url, official_website_url)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?);
@@ -175,8 +204,8 @@ def upsert_result(data):
         slug, data["exam_name"], data.get("organization", "Government Authority"),
         data.get("result_date", "Declared Today"), data.get("exam_stage", "Final Selection"),
         data.get("status", "Declared (PDF)"),
-        data.get("view_result_url", data.get("link", "https://india.gov.in")),
-        data.get("official_website_url", data.get("link", "https://india.gov.in"))
+        view_result,
+        official_website
     ))
     conn.commit()
     conn.close()
@@ -190,6 +219,10 @@ def upsert_answer_key(data):
     if cursor.fetchone():
         conn.close()
         return False
+
+    official_notice = sanitize_url(data.get("official_notice_url"), fallback="https://india.gov.in")
+    download_url = sanitize_url(data.get("download_url"), fallback=official_notice)
+
     cursor.execute("""
     INSERT INTO answer_keys (slug, exam_name, organization, exam_date, release_date, challenge_window, download_url, official_notice_url)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?);
@@ -197,8 +230,8 @@ def upsert_answer_key(data):
         slug, data["exam_name"], data.get("organization", "Government Authority"),
         data.get("exam_date", "Recent"), data.get("release_date", "Available Now"),
         data.get("challenge_window", "Objection Window Active"),
-        data.get("download_url", data.get("link", "https://india.gov.in")),
-        data.get("official_notice_url", data.get("link", "https://india.gov.in"))
+        download_url,
+        official_notice
     ))
     conn.commit()
     conn.close()

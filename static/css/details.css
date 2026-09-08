@@ -175,17 +175,18 @@ body.dark-mode .detail-verified-seal {
 .detail-actions-top-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
-  padding-top: 14px;
-  border-top: 1px dashed var(--border-light);
+  padding-top: 18px;
+  margin-top: 18px;
+  border-top: 1px solid var(--border-light);
 }
 
 .btn-detail-cta-primary {
   height: 44px;
   padding: 0 24px;
-  border-radius: var(--radius-pill);
-  background: var(--accent-navy);
+  border-radius: 12px;
+  background: #0f172a;
   color: #ffffff;
   font-size: 0.88rem;
   font-weight: 700;
@@ -193,30 +194,31 @@ body.dark-mode .detail-verified-seal {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.2);
 }
 
 .btn-detail-cta-primary:hover {
-  background: #000;
+  background: #0284c7;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.3);
+  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.3);
+  color: #ffffff;
 }
 
 .btn-detail-cta-pdf {
   height: 44px;
   padding: 0 20px;
-  border-radius: var(--radius-pill);
+  border-radius: 12px;
   background: #ffffff;
-  border: 1px solid var(--primary-blue);
-  color: var(--primary-blue);
+  border: 1.5px solid #dc2626;
+  color: #dc2626;
   font-size: 0.88rem;
   font-weight: 700;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 body.dark-mode .btn-detail-cta-pdf {
@@ -224,16 +226,17 @@ body.dark-mode .btn-detail-cta-pdf {
 }
 
 .btn-detail-cta-pdf:hover {
-  background: var(--bg-soft-blue);
+  background: #fef2f2;
   transform: translateY(-2px);
+  color: #b91c1c;
 }
 
 .btn-detail-tool {
   height: 44px;
   padding: 0 16px;
-  border-radius: var(--radius-pill);
+  border-radius: 12px;
   border: 1px solid var(--border-card);
-  background: var(--bg-card);
+  background: #ffffff;
   color: var(--text-main);
   font-size: 0.84rem;
   font-weight: 600;
@@ -242,6 +245,12 @@ body.dark-mode .btn-detail-cta-pdf {
   align-items: center;
   gap: 6px;
   transition: all 0.15s ease;
+}
+
+body.dark-mode .btn-detail-tool {
+  background: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
 }
 
 .btn-detail-tool:hover {
@@ -263,60 +272,61 @@ body.dark-mode .btn-detail-cta-pdf {
 }
 
 /* -------------------------------------------------------------
-   4 KPI Metric Highlights Cards (Dashboard Row)
+   4 KPI Metric Highlights Cards (Responsive Grid - No Cutoffs)
    ------------------------------------------------------------- */
 .detail-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
   margin-bottom: 28px;
 }
 
 .kpi-metric-box {
-  background: var(--bg-subtle);
+  background: #f8fafc;
   border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
-  padding: 18px 16px;
+  border-radius: 16px;
+  padding: 20px 20px 18px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   transition: all 0.2s ease;
+  min-width: 0;
 }
 
 body.dark-mode .kpi-metric-box {
   background: #172033;
-  border-color: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 .kpi-metric-box:hover {
   transform: translateY(-2px);
   border-color: rgba(2, 132, 199, 0.35);
-  box-shadow: var(--shadow-subtle);
+  box-shadow: 0 10px 20px -4px rgba(15, 23, 42, 0.06);
 }
 
 .kpi-header-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .kpi-title-text {
-  font-size: 0.74rem;
-  font-weight: 600;
-  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.05em;
 }
 
 .kpi-icon-pill {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
 
 .kpi-blue   { background: #eff6ff; color: #0284c7; }
@@ -325,18 +335,21 @@ body.dark-mode .kpi-metric-box {
 .kpi-purple { background: #faf5ff; color: #9333ea; }
 
 .kpi-main-val {
-  font-size: 1.25rem;
+  font-size: 1.18rem;
   font-weight: 800;
   color: var(--text-main);
-  line-height: 1.2;
+  line-height: 1.35;
+  white-space: normal;
+  word-break: break-word;
+  overflow: visible;
 }
 
 .kpi-sub-text {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 0.76rem;
+  color: #64748b;
+  line-height: 1.3;
+  white-space: normal;
+  margin-top: 2px;
 }
 
 /* -------------------------------------------------------------
