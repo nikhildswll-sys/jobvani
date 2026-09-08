@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <circle cx="50" cy="50" r="48" fill="#0284c7" stroke="#38bdf8" stroke-width="3"/>
+  <circle cx="50" cy="50" r="42" fill="#0369a1"/>
+  <!-- Inner ring -->
+  <circle cx="50" cy="50" r="37" fill="#ffffff"/>
+  <!-- Flame / Torch of Knowledge -->
+  <path d="M50 20 C42 30, 40 40, 50 48 C60 40, 58 30, 50 20 Z" fill="#0284c7"/>
+  <path d="M50 26 C46 32, 45 38, 50 43 C55 38, 54 32, 50 26 Z" fill="#f59e0b"/>
+  <!-- Torch Handle -->
+  <rect x="47" y="48" width="6" height="18" rx="2" fill="#0369a1"/>
+  <rect x="44" y="66" width="12" height="4" rx="2" fill="#0284c7"/>
+  <!-- Text -->
+  <text x="50" y="80" font-family="-apple-system, sans-serif" font-size="10" font-weight="900" fill="#0369a1" text-anchor="middle" letter-spacing="0.5">IBPS</text>
+</svg>

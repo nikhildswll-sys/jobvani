@@ -1,0 +1,52 @@
+name: JobVani Auto-Pilot Scraper Sync
+
+on:
+  schedule:
+    # Runs every 4 hours automatically (UTC)
+    - cron: '0 */4 * * *'
+  workflow_dispatch: # Allows manual 1-click trigger from GitHub Actions tab
+  push:
+    branches: [ main, master ]
+
+permissions:
+  contents: write
+
+jobs:
+  scrape-and-update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Execute Multi-Department Scraper (SSC, UPSC, Railway, Defence, Police, All India)
+        env:
+          PYTHONPATH: backend
+        run: |
+          python -m scrapers.runner
+
+      - name: Commit and Push Updated Government Notices
+        run: |
+          git config --global user.name "JobVani-Bot"
+          git config --global user.email "bot@jobvani.in"
+          git status
+          if [ -n "$(git status --porcelain jobvani.db)" ]; then
+            git add jobvani.db
+            git commit -m "🤖 Auto-Sync: Updated Latest Govt Jobs, Admit Cards & Results [skip ci]"
+            git push
+          else
+            echo "No new jobs to commit. Database is already up to date!"
+          fi

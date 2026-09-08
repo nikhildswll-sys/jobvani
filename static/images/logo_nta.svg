@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <circle cx="50" cy="50" r="48" fill="#0284c7" stroke="#f97316" stroke-width="3"/>
+  <circle cx="50" cy="50" r="42" fill="#ffffff"/>
+  <!-- Graduation cap -->
+  <polygon points="50,26 78,38 50,50 22,38" fill="#0284c7"/>
+  <path d="M34 44 v12 c0 8 32 8 32 0 v-12" fill="#f97316"/>
+  <text x="50" y="74" font-family="-apple-system, sans-serif" font-size="12" font-weight="900" fill="#0284c7" text-anchor="middle">NTA</text>
+  <text x="50" y="84" font-family="-apple-system, sans-serif" font-size="6" font-weight="700" fill="#64748b" text-anchor="middle">EXCELLENCE</text>
+</svg>
