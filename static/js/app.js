@@ -310,7 +310,18 @@ const JobVaniApp = {
     if (badgeCount) badgeCount.textContent = `${jobs ? jobs.length : 0} Active`;
 
     if (!jobs || jobs.length === 0) {
-      gridEl.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px; background: var(--bg-card); border-radius: var(--radius-md);">No recruitments match your current filters. Try selecting "All Qualifications" or another category.</p>';
+      gridEl.innerHTML = `
+        <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 50px 20px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px dashed var(--border-card);">
+          <div style="font-size: 2.2rem; margin-bottom: 12px;">⚡</div>
+          <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin-bottom: 8px;">Database is Ready for Auto-Pilot Ingestion</h3>
+          <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px; max-width: 480px; margin-left: auto; margin-right: auto;">
+            Saari purani jobs hata di gayi hain! Ab Admin Panel me jaakar <strong>"Run Auto-Pilot Scraper"</strong> par click karke live official recruitments fetch karein!
+          </p>
+          <a href="#admin" class="btn-login" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; padding: 10px 24px;">
+            <i class="fa-solid fa-arrows-rotate"></i> Go to Admin & Run Scraper
+          </a>
+        </div>
+      `;
       return;
     }
 
@@ -1369,7 +1380,8 @@ const JobVaniApp = {
     }
 
     if (res && res.status === 'success') {
-      this.showToast(`✅ Ingested ${res.new_jobs_added} new notifications!`);
+      const added = (res.total_new_jobs !== undefined) ? res.total_new_jobs : (res.new_jobs_added || 0);
+      this.showToast(`✅ Ingested ${added} new government notifications!`);
       this.renderAdminDashboard();
     } else {
       this.showToast('Notice: Scraper completed sync with official feeds.');

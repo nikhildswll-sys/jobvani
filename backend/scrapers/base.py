@@ -125,9 +125,9 @@ def upsert_job(data):
         data.get("exam_pattern", "General Awareness, Reasoning, Quantitative Aptitude & English"),
         data.get("syllabus_summary", "Detailed syllabus as prescribed in official gazette notification."),
         data.get("how_to_apply", "Apply online through the official department web portal."),
-        data.get("official_notification_url", data.get("link", "https://jobvani.in")),
-        data.get("official_apply_url", data.get("link", "https://jobvani.in")),
-        data.get("official_website_url", data.get("official_website_url", data.get("link", "https://jobvani.in"))),
+        data.get("official_notification_url") or data.get("link") or "https://india.gov.in",
+        data.get("official_apply_url") or data.get("link") or "https://india.gov.in",
+        data.get("official_website_url") or data.get("link") or "https://india.gov.in",
         data.get("status_badge", "New"),
         data.get("is_trending", 0),
         data.get("trending_score", 50),
@@ -153,8 +153,8 @@ def upsert_admit_card(data):
         slug, data["exam_name"], data.get("organization", "Government Authority"),
         data.get("release_date", "Live Now"), data.get("exam_date", "Check Notice"),
         data.get("category", "General"), data.get("status", "Available Now"),
-        data.get("download_url", data.get("link", "https://jobvani.in")),
-        data.get("official_website_url", data.get("link", "https://jobvani.in"))
+        data.get("download_url", data.get("link", "https://india.gov.in")),
+        data.get("official_website_url", data.get("link", "https://india.gov.in"))
     ))
     conn.commit()
     conn.close()
@@ -175,8 +175,8 @@ def upsert_result(data):
         slug, data["exam_name"], data.get("organization", "Government Authority"),
         data.get("result_date", "Declared Today"), data.get("exam_stage", "Final Selection"),
         data.get("status", "Declared (PDF)"),
-        data.get("view_result_url", data.get("link", "https://jobvani.in")),
-        data.get("official_website_url", data.get("link", "https://jobvani.in"))
+        data.get("view_result_url", data.get("link", "https://india.gov.in")),
+        data.get("official_website_url", data.get("link", "https://india.gov.in"))
     ))
     conn.commit()
     conn.close()
@@ -197,8 +197,8 @@ def upsert_answer_key(data):
         slug, data["exam_name"], data.get("organization", "Government Authority"),
         data.get("exam_date", "Recent"), data.get("release_date", "Available Now"),
         data.get("challenge_window", "Objection Window Active"),
-        data.get("download_url", data.get("link", "https://jobvani.in")),
-        data.get("official_notice_url", data.get("link", "https://jobvani.in"))
+        data.get("download_url", data.get("link", "https://india.gov.in")),
+        data.get("official_notice_url", data.get("link", "https://india.gov.in"))
     ))
     conn.commit()
     conn.close()
